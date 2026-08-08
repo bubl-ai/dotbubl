@@ -56,3 +56,15 @@ When asked what's in the backlog, what to work on next, or for a filtered
 view (by `type` or `tag`): read every `backlog/*.md` file, parse its
 frontmatter, and present the items sorted by `priority` (`P0` first, `P3`
 last) with `id` as the tiebreaker for items sharing a priority.
+
+## Creating an item — explicit ask
+
+When the user says they want to log a new todo/idea: gather, conversationally,
+whatever of these isn't already given — title, `type`, `priority` (ask
+directly, never default), `tags`, description, acceptance criteria. Compute
+the next id and slug per "Item files" above, write
+`backlog/NNNN-slug.md` with the frontmatter + body shape shown above, then
+confirm what was added (id, title, path).
+
+No separate confirmation gate is needed here — the user initiated this
+directly and was present for the conversational gathering.
