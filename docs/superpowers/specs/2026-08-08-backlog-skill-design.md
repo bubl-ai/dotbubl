@@ -1,7 +1,7 @@
 # Backlog skill — design
 
 Date: 2026-08-08
-Status: approved, pending implementation plan
+Status: implemented
 
 ## Problem
 

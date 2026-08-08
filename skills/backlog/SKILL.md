@@ -1,6 +1,6 @@
 ---
 name: backlog
-description: Use when the user wants to log a new todo/idea, when a task identified during work is deferred to a future PR/MR and the user approves, or when asked what's in the backlog or what to work on next. Manages a per-project backlog/ folder of markdown items with type, priority, and tags.
+description: Use when the user wants to log a new todo/idea, when a task identified during work is deferred to a future PR/MR and the user approves, when asked what's in the backlog or what to work on next, or when a backlog item is done and should be removed. Manages a per-project backlog/ folder of markdown items with type, priority, and tags.
 ---
 
 # Backlog
@@ -22,6 +22,14 @@ One file per item: `backlog/NNNN-slug.md`.
   only**. Compute the next id by listing `backlog/*.md`, extracting the
   leading `NNNN` from each filename, taking the max, and adding 1. If the
   directory is empty or doesn't exist yet, the next id is `1`.
+- Ids are **never reused**, even after a completed item's file is deleted —
+  a stale `depends_on` reference or changelog mention of that number must
+  keep pointing at the same item it always did. Don't trust "max of what's
+  currently present" if a higher id could have existed and been deleted
+  since. If there's any doubt (e.g. the directory looks sparser than its
+  ids suggest), run `git log --diff-filter=D --name-only -- backlog/` to
+  check prior filenames before assigning a new id from what looks like a
+  gap.
 - `slug`: the title, lowercased, punctuation stripped, spaces replaced with
   hyphens, truncated to ~40 characters.
 
@@ -88,8 +96,15 @@ mechanics and post-write confirmation as the explicit-ask path above.
 
 When the user indicates a backlog item is done (e.g. "mark #3 done", "that
 backlog item is finished", "the fix shipped"): find `backlog/NNNN-*.md` for
-that id, show a confirmation line — `Remove backlog item #<id> "<title>"? —
-it's assumed shipped/recorded elsewhere (e.g. the changelog), not archived
-here.` — and wait for an explicit yes. Once confirmed, delete the file. There
-is no status field and no archive: a completed item's only record after this
-point is your changelog/commit history, not the backlog.
+that id. If no id is given, or the phrase could match more than one item,
+list the candidate item(s) — id and title — and have the user confirm or
+pick which one before proceeding. Then show a confirmation line and wait for
+an explicit yes:
+
+> Remove backlog item #<id> "<title>"?
+
+Do not delete the file until the user responds affirmatively to that
+specific confirmation. It's assumed the work is shipped/recorded elsewhere
+(e.g. the changelog) — there is no status field and no archive: a completed
+item's only record after this point is the project's changelog/commit
+history, not the backlog.

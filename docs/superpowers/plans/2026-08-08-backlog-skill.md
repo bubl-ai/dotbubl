@@ -328,14 +328,15 @@ Append to `skills/backlog/SKILL.md`:
 When Claude (or a subagent) identifies, during work, something that could be
 tackled in a future PR/MR, and the user approves deferring it: draft title,
 `type`, `priority`, `tags`, description, and acceptance criteria from the
-conversation context that already exists. Then show a confirmation line and
-wait for an explicit yes before doing anything else:
+conversation context that already exists. If `priority` is not clear from that
+context, ask directly before proceeding — never default it. Then show a
+confirmation line and wait for an explicit yes before doing anything else:
 
 > Adding to backlog: "<title>" [<type> / <priority> / <tags>] — sound right?
 
 Do not write the file until the user responds affirmatively to that specific
 confirmation. Once confirmed, write it using the same id/slug/frontmatter
-mechanics as the explicit-ask path above.
+mechanics and post-write confirmation as the explicit-ask path above.
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
