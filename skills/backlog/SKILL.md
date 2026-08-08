@@ -5,8 +5,17 @@ description: Use when the user wants to log a new todo/idea, when a task identif
 
 # Backlog
 
-Manages a lightweight, git-native backlog for the *current project* — never
-for the `dotbubl` plugin itself.
+Manages a lightweight, git-native backlog for the *current project* —
+including the `dotbubl` repo itself when that's the current project.
+
+`dotbubl`'s own `backlog/` is git-ignored (see `.gitignore`): the plugin
+manifest ships the whole repo root to every installer
+(`"source": "./"` in `.claude-plugin/marketplace.json`) and the repo is
+public, so anything committed here is what everyone downloads and can
+browse on GitHub. Backlog items are personal planning notes, not something
+to publish — the skill still creates and manages them normally, they just
+never get committed, and won't sync to the maintainer's other machines the
+way the rest of the repo does.
 
 ## Where the backlog lives
 

@@ -9,7 +9,7 @@
     {
       "name": "dotbubl",
       "description": "Claude Code toolkit: skills, agents, hooks and conventions, shared across all projects and machines.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "source": "./",
       "author": {
         "name": "Santiago Olivar",
