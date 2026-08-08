@@ -23,7 +23,12 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Skill Priority
 
-This toolkit is new — there's only one skill so far (this one). As more dotbubl skills are added, document their priority order here (e.g. which process skill runs before which implementation skill).
+This toolkit is still small — there are two skills so far: this one
+(`using-dotbubl`) and `backlog`. `backlog` is standalone and independently
+triggered, with no ordering relationship to this skill or anything else —
+nothing to sequence yet. As more dotbubl skills are added, document their
+priority order here (e.g. which process skill runs before which
+implementation skill).
 
 ## Red Flags
 

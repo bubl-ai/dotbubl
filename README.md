@@ -45,6 +45,7 @@ Then `/reload-plugins` after each edit to pick up changes.
   marketplace.json  # self-hosted marketplace (this repo installs itself)
 skills/
   using-dotbubl/     # meta-skill: enforces checking/using skills before acting
+  backlog/           # per-project backlog of todos/ideas
 hooks/
   hooks.json         # registers the SessionStart hook
   session-start      # injects using-dotbubl as always-on context
