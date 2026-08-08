@@ -1,6 +1,6 @@
 # dotbubl
 
-Santiago's personal Claude Code toolkit — skills, agents, hooks and conventions,
+Claude Code toolkit — skills, agents, hooks and conventions,
 versioned in git and installed as a plugin so they're available in every project
 on every machine, without living inside any single repo's `.claude/` folder.
 
