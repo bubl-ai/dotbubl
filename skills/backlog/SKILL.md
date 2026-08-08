@@ -55,6 +55,12 @@ created: 2026-08-08
 - [ ] ...
 ```
 
+`title`, `type`, `priority`, `description`, and `acceptance criteria` are
+all **required** — never write an item missing any of these, and never
+fill one with a generic placeholder just to move forward. If one can't be
+gathered or drafted from context, ask for it before writing. `tags` and
+`depends_on` are optional.
+
 `priority` must always be asked directly if not already stated — never
 silently defaulted.
 
@@ -69,24 +75,36 @@ last) with `id` as the tiebreaker for items sharing a priority.
 
 When the user says they want to log a new todo/idea: gather, conversationally,
 whatever of these isn't already given — title, `type`, `priority` (ask
-directly, never default), `tags`, description, acceptance criteria. Compute
-the next id and slug per "Item files" above, write
-`backlog/NNNN-slug.md` with the frontmatter + body shape shown above, then
-confirm what was added (id, title, path).
+directly, never default), `tags`, description, acceptance criteria. Title,
+type, priority, description, and acceptance criteria are required — keep
+asking until each is actually provided; don't move on with any of them
+missing or generic.
 
-No separate confirmation gate is needed here — the user initiated this
-directly and was present for the conversational gathering.
+Once everything required is gathered, show a confirmation line and wait for
+an explicit yes before writing:
+
+> Add to backlog: "<title>" [<type> / <priority> / <tags>] — with
+> description and N acceptance criteria. Sound right?
+
+Do not write the file until the user responds affirmatively to that
+specific confirmation. Once confirmed, compute the next id and slug per
+"Item files" above, write `backlog/NNNN-slug.md` with the frontmatter +
+body shape shown above, then confirm what was added (id, title, path).
 
 ## Creating an item — deferred task identified mid-session
 
 When Claude (or a subagent) identifies, during work, something that could be
 tackled in a future PR/MR, and the user approves deferring it: draft title,
 `type`, `priority`, `tags`, description, and acceptance criteria from the
-conversation context that already exists. If `priority` is not clear from that
-context, ask directly before proceeding — never default it. Then show a
-confirmation line and wait for an explicit yes before doing anything else:
+conversation context that already exists. Title, type, priority,
+description, and acceptance criteria are required — if the context doesn't
+give enough to draft a real one (not a placeholder), ask before showing the
+confirmation line. If `priority` is not clear from that context, ask
+directly before proceeding — never default it. Then show a confirmation
+line and wait for an explicit yes before doing anything else:
 
-> Adding to backlog: "<title>" [<type> / <priority> / <tags>] — sound right?
+> Adding to backlog: "<title>" [<type> / <priority> / <tags>] — with
+> description and N acceptance criteria. Sound right?
 
 Do not write the file until the user responds affirmatively to that specific
 confirmation. Once confirmed, write it using the same id/slug/frontmatter

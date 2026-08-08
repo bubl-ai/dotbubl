@@ -14,16 +14,19 @@
 
 **Testing gotcha #3 (discovered during Task 3, applies to any scratch-repo test involving "context that already exists"):** the skill correctly refuses to fabricate title/description/acceptance-criteria specifics when the scratch repo has no actual code for a "while reviewing this code..." prompt to refer to — this is good behavior, not a bug, but it means test prompts describing a code-review scenario need enough concrete, specific detail (a real-sounding function/field name, a real-sounding gap) for the model to draft from, not a vague one-liner. Verified working end-to-end with a concrete prompt naming a specific function and specific missing validations.
 
+**Post-merge-review addendum (requested after PR #3 was opened):** the original design deliberately gave the explicit-ask path no confirmation gate ("the user initiated this directly," Global Constraints below). On review, that left a real gap: nothing enforced that `description`/`acceptance criteria` were actually populated (vs. left generic or empty) before writing, on *either* creation path, and explicit-ask had no checkpoint at all to catch it. Fixed by (a) making `title`/`type`/`priority`/`description`/`acceptance criteria` explicitly required on both paths — ask rather than write with any missing or generic — and (b) giving explicit-ask the same confirm-then-write gate the deferred-task path already had, with both confirmation lines now noting the description/acceptance-criteria count so completeness is visible before writing, not just after. This supersedes the "no extra confirmation gate" line in Global Constraints below and Task 2's original Step 1/Step 3 blocks (kept below for history; Test 2 is now a two-turn test matching Task 3's pattern). Verified: all 4 existing smoke tests still pass, plus a new explicit negative test confirming the skill asks for missing required fields rather than writing an incomplete item.
+
 ## Global Constraints
 
-(Copied from `docs/superpowers/specs/2026-08-08-backlog-skill-design.md` — every task's work implicitly includes these.)
+(Copied from `docs/superpowers/specs/2026-08-08-backlog-skill-design.md` — every task's work implicitly includes these. See the post-merge-review addendum above for where this has since been superseded.)
 
 - Backlog lives at `<project-root>/backlog/` where `<project-root>` is `git rev-parse --show-toplevel` of the invoking project — never inside `dotbubl`.
 - One file per item: `backlog/NNNN-slug.md`, id zero-padded to 4 digits in the filename only.
 - No persisted index file. No status field. Completed items are **deleted**, not archived.
 - Frontmatter fields: `id` (plain integer), `title`, `type` (closed enum: `bug`, `feature`, `enhancement`, `regression`, `chore`, `docs`, `spike`), `priority` (`P0`-`P3`), `tags` (free-form list), `depends_on` (optional list of ids), `created` (`YYYY-MM-DD`). Body: `## Description`, `## Acceptance Criteria`.
+- `title`, `type`, `priority`, `description`, and `acceptance criteria` are all required on every item — never written missing or generic. (Added post-merge-review; see addendum above.)
 - `priority` is always asked directly, never defaulted. `depends_on` is only set when explicitly stated, never inferred.
-- Two triggers: (1) explicit ask → gather details conversationally, write directly, no extra confirmation gate. (2) task identified and deferred mid-session, user approves → draft from context, **show a confirmation line, wait for explicit yes**, only then write.
+- Two triggers, **both** gated on an explicit confirm-then-write step as of the post-merge-review addendum above: (1) explicit ask → gather details conversationally, confirm, then write. (2) task identified and deferred mid-session, user approves → draft from context, confirm, then write.
 - Skill name: `backlog` (namespaced as `/dotbubl:backlog` once installed).
 
 ---
