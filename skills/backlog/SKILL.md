@@ -83,3 +83,13 @@ confirmation line and wait for an explicit yes before doing anything else:
 Do not write the file until the user responds affirmatively to that specific
 confirmation. Once confirmed, write it using the same id/slug/frontmatter
 mechanics and post-write confirmation as the explicit-ask path above.
+
+## Completing an item
+
+When the user indicates a backlog item is done (e.g. "mark #3 done", "that
+backlog item is finished", "the fix shipped"): find `backlog/NNNN-*.md` for
+that id, show a confirmation line — `Remove backlog item #<id> "<title>"? —
+it's assumed shipped/recorded elsewhere (e.g. the changelog), not archived
+here.` — and wait for an explicit yes. Once confirmed, delete the file. There
+is no status field and no archive: a completed item's only record after this
+point is your changelog/commit history, not the backlog.
