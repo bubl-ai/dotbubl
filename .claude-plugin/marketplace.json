@@ -1,0 +1,20 @@
+{
+  "name": "dotbubl",
+  "description": "Personal marketplace hosting the dotbubl Claude Code toolkit.",
+  "owner": {
+    "name": "Santiago Olivar",
+    "email": "santiago@bubl-ai.com"
+  },
+  "plugins": [
+    {
+      "name": "dotbubl",
+      "description": "Claude Code toolkit: skills, agents, hooks and conventions, shared across all projects and machines.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Santiago Olivar",
+        "email": "santiago@bubl-ai.com"
+      }
+    }
+  ]
+}
