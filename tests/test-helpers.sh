@@ -27,11 +27,17 @@ fi
 #   branch content before it's installed anywhere, not an already-installed
 #   plugin. Using an installed copy here would test the wrong thing.
 # - Always passes --permission-mode acceptEdits: our tested behaviors write
-#   and delete real files. Without this, non-interactive -p writes get
-#   silently blocked and the model asks for permission in text instead of
-#   actually writing — looks exactly like "the skill didn't trigger" but
-#   isn't. Superpowers' sampled tests are mostly read-only comprehension
-#   checks ("what does this skill do?"), so they don't need it.
+#   real files. Without this, non-interactive -p writes get silently
+#   blocked and the model asks for permission in text instead of actually
+#   writing — looks exactly like "the skill didn't trigger" but isn't.
+#   Superpowers' sampled tests are mostly read-only comprehension checks
+#   ("what does this skill do?"), so they don't need it. Note: completion
+#   (deletion) has no dedicated file tool and goes through Bash `rm` —
+#   acceptEdits is documented as covering Edit/Write/NotebookEdit
+#   specifically, not Bash. Empirically this hasn't caused a problem across
+#   every test-4-completion.sh run so far (deletion has always gone
+#   through cleanly), but if headless deletion ever starts blocking, this
+#   is the first place to look.
 # - Third arg is literally --continue, for a second turn in the same
 #   scratch-repo session (our confirm-then-write/delete gates need this).
 run_claude() {
@@ -44,7 +50,10 @@ run_claude() {
     cmd+=(-p "$prompt")
 
     if [[ -n "$_TIMEOUT_CMD" ]]; then
-        "$_TIMEOUT_CMD" "$timeout_s" "${cmd[@]}"
+        # -k: escalate to SIGKILL if still running 10s after the initial
+        # signal, so a hung/SIGTERM-ignoring claude process is actually
+        # bounded rather than potentially waiting indefinitely.
+        "$_TIMEOUT_CMD" -k 10 "$timeout_s" "${cmd[@]}"
     else
         "${cmd[@]}"
     fi
@@ -88,7 +97,11 @@ assert_not_contains() {
     fi
 }
 
-# Check that pattern A appears before pattern B in output.
+# Check that pattern A appears before pattern B in output — by line number,
+# falling back to in-line character position when both land on the same
+# line (a model isn't guaranteed to one-item-per-line just because asked
+# to), rather than reporting a false FAIL for a same-line case where A
+# still textually precedes B.
 # Usage: assert_order "output" "pattern_a" "pattern_b" "test name"
 assert_order() {
     local output="$1"
@@ -108,12 +121,30 @@ assert_order() {
         echo "  [FAIL] $test_name: pattern B not found: $pattern_b"
         return 1
     fi
+
     if [[ "$line_a" -lt "$line_b" ]]; then
         echo "  [PASS] $test_name (A at line $line_a, B at line $line_b)"
         return 0
+    elif [[ "$line_a" -eq "$line_b" ]]; then
+        # Same line: compare literal substring position instead of failing
+        # outright. index() is a plain substring search (not regex) — fine
+        # here since assert_order is always called with literal text, not
+        # patterns relying on regex metacharacters.
+        local line_text pos_a pos_b
+        line_text=$(echo "$output" | sed -n "${line_a}p")
+        pos_a=$(awk -v s="$line_text" -v p="$pattern_a" 'BEGIN{print index(tolower(s), tolower(p))}')
+        pos_b=$(awk -v s="$line_text" -v p="$pattern_b" 'BEGIN{print index(tolower(s), tolower(p))}')
+        if [[ "$pos_a" -gt 0 && "$pos_b" -gt 0 && "$pos_a" -lt "$pos_b" ]]; then
+            echo "  [PASS] $test_name (both on line $line_a, A before B)"
+            return 0
+        else
+            echo "  [FAIL] $test_name: both on line $line_a but A not before B"
+            echo "  Line: $line_text"
+            return 1
+        fi
     else
         echo "  [FAIL] $test_name"
-        echo "  Expected '$pattern_a' before '$pattern_b', found A at $line_a, B at $line_b"
+        echo "  Expected '$pattern_a' before '$pattern_b', found A at line $line_a, B at line $line_b"
         return 1
     fi
 }

@@ -70,6 +70,7 @@ Each `test-N-<behavior>.sh`:
 | `test-3-deferred-task.sh` | Deferred-task creation confirms before writing, writes a complete item |
 | `test-4-completion.sh` | Completion confirms before deleting |
 | `test-5-required-fields.sh` | Missing required fields (priority/description/acceptance criteria) block the write, prompting instead |
+| `test-6-no-placeholders.sh` | Generic placeholder content ("N/A") for required fields blocks the write too, not just fully-absent fields |
 
 ## Adding new tests
 

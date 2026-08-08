@@ -19,17 +19,17 @@ exist yet (first use in a project).
 One file per item: `backlog/NNNN-slug.md`.
 
 - `NNNN`: sequential integer id, zero-padded to 4 digits in the **filename
-  only**. Compute the next id by listing `backlog/*.md`, extracting the
-  leading `NNNN` from each filename, taking the max, and adding 1. If the
-  directory is empty or doesn't exist yet, the next id is `1`.
-- Ids are **never reused**, even after a completed item's file is deleted —
-  a stale `depends_on` reference or changelog mention of that number must
-  keep pointing at the same item it always did. Don't trust "max of what's
-  currently present" if a higher id could have existed and been deleted
-  since. If there's any doubt (e.g. the directory looks sparser than its
-  ids suggest), run `git log --diff-filter=D --name-only -- backlog/` to
-  check prior filenames before assigning a new id from what looks like a
-  gap.
+  only**. Compute the next id as the max of (a) every `NNNN` currently
+  present in `backlog/*.md`, and (b) every `NNNN` that ever existed there,
+  by running `git log --diff-filter=D --name-only -- backlog/` and
+  extracting ids from the deleted filenames — then add 1. Always check
+  (b), not just when the directory happens to look sparse: a backlog
+  completed in id order (e.g. 4-7 done and deleted, leaving 1-3) looks
+  perfectly dense with no visible gap, and would otherwise silently
+  reassign a previously-used id. If the directory is empty, doesn't exist
+  yet, and `git log` shows no prior deletions, the next id is `1`.
+- Ids are **never reused** — a stale `depends_on` reference or changelog
+  mention of a number must keep pointing at the same item it always did.
 - `slug`: the title, lowercased, punctuation stripped, spaces replaced with
   hyphens, truncated to ~40 characters.
 

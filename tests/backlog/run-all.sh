@@ -36,7 +36,10 @@ run_with_timeout() {
     local seconds="$1"
     shift
     if [[ -n "$TIMEOUT_CMD" ]]; then
-        "$TIMEOUT_CMD" "$seconds" "$@"
+        # -k: if the process ignores SIGTERM and is still running 10s later,
+        # send SIGKILL. Without this, a hung claude CLI can wait indefinitely
+        # instead of actually being bounded by $TIMEOUT.
+        "$TIMEOUT_CMD" -k 10 "$seconds" "$@"
     else
         "$@"
     fi
@@ -44,7 +47,10 @@ run_with_timeout() {
 
 VERBOSE=false
 SPECIFIC_TEST=""
-TIMEOUT=120  # per-test-file budget; each test does 1-2 real claude invocations
+# Per-test-file budget. Tests make 1-2 real claude invocations at up to 60s
+# each (see test-helpers.sh's run_claude) — 120s would leave zero slack for
+# git init / process-startup overhead on a slow machine, so give it room.
+TIMEOUT=180
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -90,6 +96,11 @@ if [[ -n "$SPECIFIC_TEST" ]]; then
     tests=("$SCRIPT_DIR/$SPECIFIC_TEST")
 fi
 
+if [[ "${#tests[@]}" -eq 0 ]]; then
+    echo "ERROR: no test files matched — nothing to run."
+    exit 1
+fi
+
 passed=0
 failed=0
 
@@ -100,7 +111,12 @@ for test_path in "${tests[@]}"; do
     echo "----------------------------------------"
 
     if [[ ! -f "$test_path" ]]; then
-        echo "  [SKIP] Test file not found: $test_name"
+        # A bad --test NAME must count as a failure, not a silent skip — an
+        # empty/all-skipped run would otherwise fall through to "failed=0"
+        # and print STATUS: PASSED despite nothing having actually run.
+        echo "  [FAIL] Test file not found: $test_name"
+        failed=$((failed + 1))
+        echo ""
         continue
     fi
     [[ -x "$test_path" ]] || chmod +x "$test_path"
