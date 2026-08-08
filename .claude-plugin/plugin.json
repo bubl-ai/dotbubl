@@ -1,0 +1,18 @@
+{
+  "name": "dotbubl",
+  "description": "Santiago's personal Claude Code toolkit: skills, agents, hooks and conventions, shared across all projects and machines.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Santiago Olivar",
+    "email": "contact.bubl.ai@gmail.com"
+  },
+  "homepage": "https://github.com/bubl-ai/dotbubl",
+  "repository": "https://github.com/bubl-ai/dotbubl",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "toolkit",
+    "personal",
+    "workflows"
+  ]
+}
