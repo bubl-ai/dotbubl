@@ -12,6 +12,8 @@
 
 **Testing gotcha #2 (discovered during Task 3, applies to the two-turn confirmation-gate test):** don't layer a redundant user-authored "don't do X until I separately say go ahead" instruction on top of the skill's own confirmation gate in the turn-1 prompt — the model reasonably treats that as a second, distinct gate on top of the "sound right?" confirmation, turning a 2-turn test into a 3-turn interaction and making turn 2 look like a failure to write when it's actually just answering the wrong question. State only what the design actually specifies (identification + approval to defer) in turn 1, and let the skill's own single confirmation line be the one thing turn 2's "yes" responds to.
 
+**Testing gotcha #3 (discovered during Task 3, applies to any scratch-repo test involving "context that already exists"):** the skill correctly refuses to fabricate title/description/acceptance-criteria specifics when the scratch repo has no actual code for a "while reviewing this code..." prompt to refer to — this is good behavior, not a bug, but it means test prompts describing a code-review scenario need enough concrete, specific detail (a real-sounding function/field name, a real-sounding gap) for the model to draft from, not a vague one-liner. Verified working end-to-end with a concrete prompt naming a specific function and specific missing validations.
+
 ## Global Constraints
 
 (Copied from `docs/superpowers/specs/2026-08-08-backlog-skill-design.md` — every task's work implicitly includes these.)
@@ -290,7 +292,7 @@ SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
 
-claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "While reviewing this code you noticed input validation could be split into a separate follow-up PR. Propose deferring it: type chore, priority P2, tag validation. I approve deferring it."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "While reviewing this code you noticed the create_user function doesn't validate the email field format or check for empty password values before hashing. That's worth fixing but out of scope for this PR — propose deferring it as a follow-up: type chore, priority P2, tag validation. I approve deferring it."
 
 if find backlog -maxdepth 1 -name '*.md' 2>/dev/null | grep -q .; then
   echo "FAIL: a file was written before explicit go-ahead"
