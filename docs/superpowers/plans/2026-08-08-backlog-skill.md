@@ -10,6 +10,8 @@
 
 **Testing gotcha (discovered during Task 2, applies to every test script that writes or deletes a file):** non-interactive `-p` invocations need `--permission-mode acceptEdits` or the model silently can't write/delete and asks for permission in its text reply instead — this looks exactly like "the skill isn't triggering" but isn't. Also: `--plugin-dir` must point at *this plan's worktree* (wherever it is checked out), never the main checkout, until this branch is merged — the main checkout won't have this branch's `skills/backlog/` content.
 
+**Testing gotcha #2 (discovered during Task 3, applies to the two-turn confirmation-gate test):** don't layer a redundant user-authored "don't do X until I separately say go ahead" instruction on top of the skill's own confirmation gate in the turn-1 prompt — the model reasonably treats that as a second, distinct gate on top of the "sound right?" confirmation, turning a 2-turn test into a 3-turn interaction and making turn 2 look like a failure to write when it's actually just answering the wrong question. State only what the design actually specifies (identification + approval to defer) in turn 1, and let the skill's own single confirmation line be the one thing turn 2's "yes" responds to.
+
 ## Global Constraints
 
 (Copied from `docs/superpowers/specs/2026-08-08-backlog-skill-design.md` — every task's work implicitly includes these.)
@@ -288,7 +290,7 @@ SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
 
-claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "While reviewing this code you noticed input validation could be split into a separate follow-up PR. Propose deferring it: type chore, priority P2, tag validation. I approve deferring it — but don't add it to the backlog until I separately say to go ahead."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "While reviewing this code you noticed input validation could be split into a separate follow-up PR. Propose deferring it: type chore, priority P2, tag validation. I approve deferring it."
 
 if find backlog -maxdepth 1 -name '*.md' 2>/dev/null | grep -q .; then
   echo "FAIL: a file was written before explicit go-ahead"
