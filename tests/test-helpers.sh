@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Helper functions for skills/backlog smoke tests.
-# Modeled on obra/superpowers' tests/claude-code/test-helpers.sh — see
-# docs/testing.md for what's kept, adapted, or deliberately not copied.
+# Shared helper functions for every skill's tests under tests/<skill-name>/.
+# One shared file, not one per skill — matches obra/superpowers, where every
+# skill's tests in tests/claude-code/ source the same test-helpers.sh rather
+# than each carrying its own copy. See docs/testing.md for what's kept,
+# adapted, or deliberately not copied from theirs.
 
 # Repo root, computed from this file's own location so it works whether
 # run from the primary checkout or any worktree — never hardcode a path.
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # macOS ships no `timeout` (BSD userland); coreutils via Homebrew provides
 # it as `gtimeout`. Fall back to running untimed rather than failing outright.

@@ -59,12 +59,17 @@ Each skill's test directory has its own `README.md` with specifics.
 
 ## Writing tests for a new skill
 
-1. Copy the shape of `tests/backlog/` — `test-helpers.sh`, `test-N-*.sh`
-   per behavior, `run-all.sh`, `README.md`.
-2. Reuse `test-helpers.sh`'s `assert_*` functions where the assertions are
-   generic (output/file checks); add skill-specific helpers only where
-   genuinely needed, the way `assert_frontmatter` was added for
-   backlog's YAML-frontmatter items.
+1. Create `tests/<skill-name>/` with `test-N-*.sh` per behavior,
+   `run-all.sh`, `README.md` — copy the shape of `tests/backlog/`.
+2. **Source the shared `tests/test-helpers.sh`** (`"$SCRIPT_DIR/../test-helpers.sh"`
+   from inside `tests/<skill-name>/`) — don't copy it per skill. This
+   matches superpowers: every skill's tests in `tests/claude-code/` source
+   the same `test-helpers.sh`, not a per-skill copy. Extend the shared file
+   when a new assertion is generically useful (the way `assert_frontmatter`
+   was added for YAML-frontmatter items — useful to any future skill with
+   frontmatter, not backlog-specific despite being added for it); keep
+   something truly skill-specific local to that skill's own test directory
+   instead.
 3. See `CLAUDE.md`'s Testing convention for the commit discipline
    (tests land in the same commit as the behavior they cover, and get
    actually run — not just claimed — before committing).

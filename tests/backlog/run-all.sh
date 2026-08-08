@@ -80,7 +80,10 @@ done
 
 tests=()
 for f in "$SCRIPT_DIR"/test-*.sh; do
-    [[ "$(basename "$f")" == "test-helpers.sh" ]] && continue
+    # Defensive: test-helpers.sh lives at tests/, not here, so this normally
+    # matches nothing — but skip anything matching *-helpers.sh in case a
+    # skill ever adds its own local supplementary helper file.
+    [[ "$(basename "$f")" == *-helpers.sh ]] && continue
     tests+=("$f")
 done
 if [[ -n "$SPECIFIC_TEST" ]]; then

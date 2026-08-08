@@ -2,7 +2,7 @@
 # Verifies: querying the backlog reports items sorted by priority (P0 first).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$SCRIPT_DIR/../test-helpers.sh"
 
 echo "=== Test: query sorts by priority ==="
 

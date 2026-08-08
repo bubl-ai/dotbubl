@@ -3,7 +3,7 @@
 # writes a fully-populated item only after explicit go-ahead (turn 2).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$SCRIPT_DIR/../test-helpers.sh"
 
 echo "=== Test: explicit-ask creation gates on confirmation ==="
 

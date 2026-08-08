@@ -3,7 +3,7 @@
 # a separate, explicit confirmation — the two-gate design's core property.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$SCRIPT_DIR/../test-helpers.sh"
 
 echo "=== Test: deferred-task creation gates on confirmation ==="
 

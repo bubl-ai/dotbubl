@@ -3,7 +3,7 @@
 # description, acceptance criteria) instead of writing an incomplete item.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$SCRIPT_DIR/../test-helpers.sh"
 
 echo "=== Test: asks for missing required fields instead of writing incomplete item ==="
 

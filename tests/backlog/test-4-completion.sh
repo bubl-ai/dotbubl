@@ -3,7 +3,7 @@
 # file is deleted (deletion is permanent, no archive/status field).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/test-helpers.sh"
+source "$SCRIPT_DIR/../test-helpers.sh"
 
 echo "=== Test: completion gates on confirmation before deleting ==="
 

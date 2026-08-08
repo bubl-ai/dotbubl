@@ -32,9 +32,12 @@ Exit code 0 = all passed, non-zero = at least one failed.
 
 ## Test structure
 
-### test-helpers.sh
+### ../test-helpers.sh
 
-Shared functions, sourced (not run) by every test file:
+**Lives one level up, at `tests/test-helpers.sh`** — shared across every
+skill's tests, not copied per skill (matches superpowers: all of
+`tests/claude-code/*.sh` source one `test-helpers.sh`, not one each).
+Sourced (not run) by every test file here:
 - `run_claude "prompt" [timeout_seconds] [--continue]` — invoke Claude
   against this repo's plugin content
 - `assert_contains` / `assert_not_contains` / `assert_order` — check
@@ -43,10 +46,14 @@ Shared functions, sourced (not run) by every test file:
   the actual files the skill wrote or didn't write
 - `new_scratch_repo` — fresh `git init`'d temp dir, auto-cleaned on exit
 
+If you're adding a test for a *different* skill, source this same file
+(`"$SCRIPT_DIR/../test-helpers.sh"` from `tests/<that-skill>/`) rather than
+copying it — extend it there if you need a new generic assertion.
+
 ### Test files
 
 Each `test-N-<behavior>.sh`:
-1. Sources `test-helpers.sh`
+1. Sources `../test-helpers.sh`
 2. Sets up a scratch repo (and fixture files, if the scenario needs
    existing backlog items)
 3. Runs one or two `run_claude` turns
@@ -67,7 +74,7 @@ Each `test-N-<behavior>.sh`:
 ## Adding new tests
 
 1. Create `test-N-<behavior>.sh`, `chmod +x` it
-2. Source `test-helpers.sh`, use `new_scratch_repo` for setup
+2. Source `../test-helpers.sh`, use `new_scratch_repo` for setup
 3. Use the `assert_*` helpers; accumulate a `FAILURES` counter rather than
    exiting on the first failed assertion (see any existing test for the
    pattern)

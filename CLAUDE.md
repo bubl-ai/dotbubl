@@ -47,24 +47,37 @@ them back out of a plan doc. That already happened once with
 `skills/backlog` before being fixed — `tests/backlog/` is the reference
 shape for every skill after it:
 
-- `test-helpers.sh` — shared `run_claude`/`assert_*` functions (modeled on
-  superpowers' `tests/claude-code/test-helpers.sh`), sourced by every test
-  file, never run directly.
-- One `test-N-<behavior>.sh` per behavior, independently runnable, each
-  accumulating failures across its assertions rather than stopping at the
-  first one.
-- `run-all.sh` — runs every `test-*.sh` in the directory (excluding the
-  helpers file), supports `--verbose` / `--test NAME` / `--timeout`,
-  prints a pass/fail summary, exits non-zero on any failure.
-- `README.md` — structure, current test list, how to add more.
+- **`tests/test-helpers.sh`** — shared `run_claude`/`assert_*` functions
+  (modeled on superpowers' `tests/claude-code/test-helpers.sh`), one file
+  for the whole repo, sourced by every skill's test files as
+  `"$SCRIPT_DIR/../test-helpers.sh"`. **Not copied per skill** — matches
+  superpowers, where every skill's tests in `tests/claude-code/` source the
+  same file rather than each carrying its own copy. Add a new assertion
+  here when it's generically useful; keep something truly skill-specific
+  local to that skill's own `tests/<skill>/` directory instead.
+- One `tests/<skill>/test-N-<behavior>.sh` per behavior, independently
+  runnable, each accumulating failures across its assertions rather than
+  stopping at the first one.
+- `tests/<skill>/run-all.sh` — runs every `test-*.sh` in that skill's
+  directory, supports `--verbose` / `--test NAME` / `--timeout`, prints a
+  pass/fail summary, exits non-zero on any failure.
+- `tests/<skill>/README.md` — structure, current test list, how to add
+  more.
 - Whatever gotchas got learned the hard way (e.g. `--permission-mode
   acceptEdits` for non-interactive writes; macOS having no `timeout`
-  binary) get fixed in `test-helpers.sh`/`run-all.sh` directly, not just
-  noted — the next skill's tests inherit the fix for free.
+  binary) get fixed in `tests/test-helpers.sh`/`run-all.sh` directly, not
+  just noted — the next skill's tests inherit the fix for free, since
+  they source the same helpers file.
 
 **When you add or change a skill's behavior:** update or add the
-corresponding test file(s) in the same commit, and actually run
-`tests/<skill>/run-all.sh` before committing — don't just claim it passes.
+corresponding test file(s) in the same commit, and actually run the tests
+before committing — don't just claim it passes:
+
+```bash
+tests/backlog/run-all.sh                       # this skill's suite
+tests/backlog/run-all.sh --verbose              # full per-assertion output
+tests/backlog/run-all.sh --test test-2-explicit-ask.sh   # one file
+```
 
 If a plan doc's embedded test scripts (from `writing-plans`/SDD execution)
 end up diverging from what's actually committed under `tests/`, the
