@@ -2,7 +2,13 @@
 # Verifies: completing an item requires explicit confirmation before the
 # file is deleted (deletion is permanent, no archive/status field).
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/test-helpers.sh"
+
+echo "=== Test: completion gates on confirmation before deleting ==="
+
+new_scratch_repo
+FAILURES=0
 
 mkdir -p backlog
 cat > backlog/0001-fix-flaky-login-test.md <<'EOF'
@@ -22,13 +28,16 @@ The login test intermittently times out in CI.
 - [ ] Test passes 20/20 consecutive CI runs
 EOF
 
-claude_backlog -p "Backlog item 1 is done, the fix shipped."
+run_claude "Backlog item 1 is done, the fix shipped." >/dev/null
 
-[[ -f backlog/0001-fix-flaky-login-test.md ]] \
-  || fail "file was deleted before explicit go-ahead"
+assert_file_exists "backlog/0001-fix-flaky-login-test.md" "file still exists before explicit go-ahead" || FAILURES=$((FAILURES + 1))
 
-claude_backlog --continue -p "Yes, remove it."
+run_claude "Yes, remove it." 60 --continue >/dev/null
 
-[[ ! -f backlog/0001-fix-flaky-login-test.md ]] \
-  || fail "file still exists after explicit go-ahead"
-echo "PASS"
+assert_no_file "backlog/0001-fix-flaky-login-test.md" "file deleted after explicit go-ahead" || FAILURES=$((FAILURES + 1))
+
+if [[ "$FAILURES" -gt 0 ]]; then
+  echo "=== FAILED ($FAILURES) ==="
+  exit 1
+fi
+echo "=== PASS ==="

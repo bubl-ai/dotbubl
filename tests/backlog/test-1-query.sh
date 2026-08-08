@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Verifies: querying the backlog reports items sorted by priority (P0 first).
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/test-helpers.sh"
 
+echo "=== Test: query sorts by priority ==="
+
+new_scratch_repo
 mkdir -p backlog
 
 cat > backlog/0001-fix-flaky-login-test.md <<'EOF'
@@ -39,12 +43,13 @@ Users want a dark mode toggle in settings.
 - [ ] Toggle persists across sessions
 EOF
 
-OUT="$(claude_backlog -p "List everything in the backlog, sorted by priority. Format each line EXACTLY as: <priority> #<id> <title>")"
-echo "$OUT"
+output=$(run_claude "List everything in the backlog, sorted by priority. Format each line EXACTLY as: <priority> #<id> <title>")
 
-LINE_P0=$(grep -n "P0 #2 Add dark mode toggle" <<<"$OUT" | cut -d: -f1 || true)
-LINE_P2=$(grep -n "P2 #1 Fix flaky login test" <<<"$OUT" | cut -d: -f1 || true)
+FAILURES=0
+assert_order "$output" "P0 #2 Add dark mode toggle" "P2 #1 Fix flaky login test" "P0 item listed before P2 item" || FAILURES=$((FAILURES + 1))
 
-[[ -n "$LINE_P0" && -n "$LINE_P2" && "$LINE_P0" -lt "$LINE_P2" ]] \
-  || fail "expected P0 item before P2 item"
-echo "PASS"
+if [[ "$FAILURES" -gt 0 ]]; then
+  echo "=== FAILED ($FAILURES) ==="
+  exit 1
+fi
+echo "=== PASS ==="

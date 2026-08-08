@@ -2,10 +2,20 @@
 # Verifies: the skill asks for missing required fields (priority,
 # description, acceptance criteria) instead of writing an incomplete item.
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/test-helpers.sh"
 
-claude_backlog -p "Log a backlog todo. Title: Improve error messages. Type: enhancement."
+echo "=== Test: asks for missing required fields instead of writing incomplete item ==="
 
-find backlog -maxdepth 1 -name '*.md' 2>/dev/null | grep -q . \
-  && fail "a file was written despite missing priority/description/acceptance criteria"
-echo "PASS"
+new_scratch_repo
+FAILURES=0
+
+run_claude "Log a backlog todo. Title: Improve error messages. Type: enhancement." >/dev/null
+
+assert_no_file "backlog/*.md" "no file written with priority/description/acceptance criteria missing" || FAILURES=$((FAILURES + 1))
+
+if [[ "$FAILURES" -gt 0 ]]; then
+  echo "=== FAILED ($FAILURES) ==="
+  exit 1
+fi
+echo "=== PASS ==="

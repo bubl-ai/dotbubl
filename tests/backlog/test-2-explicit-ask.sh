@@ -2,19 +2,35 @@
 # Verifies: explicit-ask creation confirms before writing (turn 1), then
 # writes a fully-populated item only after explicit go-ahead (turn 2).
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/test-helpers.sh"
 
-claude_backlog -p "Log a backlog todo. Title: Add dark mode toggle. Type: feature. Priority: P1. Tags: tui. Description: Users want a dark mode toggle in settings. Acceptance criteria: Toggle persists across sessions."
+echo "=== Test: explicit-ask creation gates on confirmation ==="
 
-find backlog -maxdepth 1 -name '*.md' 2>/dev/null | grep -q . \
-  && fail "a file was written before explicit go-ahead"
+new_scratch_repo
+FAILURES=0
 
-claude_backlog --continue -p "Yes, that's right, add it."
+run_claude "Log a backlog todo. Title: Add dark mode toggle. Type: feature. Priority: P1. Tags: tui. Description: Users want a dark mode toggle in settings. Acceptance criteria: Toggle persists across sessions." >/dev/null
 
-FILE=$(find backlog -maxdepth 1 -name '0001-*.md' | head -n1)
-[[ -n "$FILE" ]] || fail "no backlog/0001-*.md file was created after go-ahead"
+assert_no_file "backlog/*.md" "no file written before explicit go-ahead" || FAILURES=$((FAILURES + 1))
 
-for pattern in '^id: 1$' '^title: Add dark mode toggle$' '^type: feature$' '^priority: P1$' 'tui'; do
-  grep -qE "$pattern" "$FILE" || { cat "$FILE"; fail "missing pattern '$pattern' in $FILE"; }
-done
-echo "PASS"
+run_claude "Yes, that's right, add it." 60 --continue >/dev/null
+
+assert_file_exists "backlog/0001-*.md" "file written after explicit go-ahead" || FAILURES=$((FAILURES + 1))
+
+FILE=$(compgen -G "backlog/0001-*.md" | head -n1 || true)
+if [[ -n "$FILE" ]]; then
+  assert_frontmatter "$FILE" '^id: 1$' "id is 1" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '^title: Add dark mode toggle$' "title correct" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '^type: feature$' "type correct" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '^priority: P1$' "priority correct" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" 'tui' "tags correct" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '## Description' "has Description section" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '## Acceptance Criteria' "has Acceptance Criteria section" || FAILURES=$((FAILURES + 1))
+fi
+
+if [[ "$FAILURES" -gt 0 ]]; then
+  echo "=== FAILED ($FAILURES) ==="
+  exit 1
+fi
+echo "=== PASS ==="
