@@ -8,6 +8,8 @@
 
 **Tech Stack:** Claude Code plugin skill (Markdown + YAML frontmatter). Bash for test scripts. `git` for repo-root detection.
 
+**Testing gotcha (discovered during Task 2, applies to every test script that writes or deletes a file):** non-interactive `-p` invocations need `--permission-mode acceptEdits` or the model silently can't write/delete and asks for permission in its text reply instead — this looks exactly like "the skill isn't triggering" but isn't. Also: `--plugin-dir` must point at *this plan's worktree* (wherever it is checked out), never the main checkout, until this branch is merged — the main checkout won't have this branch's `skills/backlog/` content.
+
 ## Global Constraints
 
 (Copied from `docs/superpowers/specs/2026-08-08-backlog-skill-design.md` — every task's work implicitly includes these.)
@@ -48,7 +50,7 @@ Create `/tmp/backlog-test-1.sh` (or any scratch path — this is a throwaway tes
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl"
+DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl/.worktrees/backlog-skill-impl"  # this plan's active worktree — NOT the main checkout, which won't have this branch's skill content until merged
 SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
@@ -202,12 +204,12 @@ Create `/tmp/backlog-test-2.sh`:
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl"
+DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl/.worktrees/backlog-skill-impl"  # this plan's active worktree — NOT the main checkout, which won't have this branch's skill content until merged
 SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
 
-claude --plugin-dir "$DOTBUBL_DIR" -p "Log a backlog todo. Title: Add dark mode toggle. Type: feature. Priority: P1. Tags: tui. Description: Users want a dark mode toggle in settings. Acceptance criteria: Toggle persists across sessions."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "Log a backlog todo. Title: Add dark mode toggle. Type: feature. Priority: P1. Tags: tui. Description: Users want a dark mode toggle in settings. Acceptance criteria: Toggle persists across sessions."
 
 FILE=$(find backlog -maxdepth 1 -name '0001-*.md' | head -n1)
 if [[ -z "$FILE" ]]; then
@@ -281,19 +283,19 @@ Create `/tmp/backlog-test-3.sh`. This tests the gate itself: turn 1 must NOT wri
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl"
+DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl/.worktrees/backlog-skill-impl"  # this plan's active worktree — NOT the main checkout, which won't have this branch's skill content until merged
 SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
 
-claude --plugin-dir "$DOTBUBL_DIR" -p "While reviewing this code you noticed input validation could be split into a separate follow-up PR. Propose deferring it: type chore, priority P2, tag validation. I approve deferring it — but don't add it to the backlog until I separately say to go ahead."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "While reviewing this code you noticed input validation could be split into a separate follow-up PR. Propose deferring it: type chore, priority P2, tag validation. I approve deferring it — but don't add it to the backlog until I separately say to go ahead."
 
 if find backlog -maxdepth 1 -name '*.md' 2>/dev/null | grep -q .; then
   echo "FAIL: a file was written before explicit go-ahead"
   exit 1
 fi
 
-claude --plugin-dir "$DOTBUBL_DIR" --continue -p "Yes, go ahead and add it."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits --continue -p "Yes, go ahead and add it."
 
 FILE=$(find backlog -maxdepth 1 -name '0001-*.md' 2>/dev/null | head -n1)
 if [[ -z "$FILE" ]]; then
@@ -363,7 +365,7 @@ Create `/tmp/backlog-test-4.sh`. Seeds one item, asks to mark it done, expects a
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl"
+DOTBUBL_DIR="/Users/santiago/Desktop/github/dotbubl/.worktrees/backlog-skill-impl"  # this plan's active worktree — NOT the main checkout, which won't have this branch's skill content until merged
 SCRATCH="$(mktemp -d)"
 cd "$SCRATCH"
 git init -q
@@ -386,14 +388,14 @@ The login test intermittently times out in CI.
 - [ ] Test passes 20/20 consecutive CI runs
 EOF
 
-claude --plugin-dir "$DOTBUBL_DIR" -p "Backlog item 1 is done, the fix shipped."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits -p "Backlog item 1 is done, the fix shipped."
 
 if [[ ! -f backlog/0001-fix-flaky-login-test.md ]]; then
   echo "FAIL: file was deleted before explicit go-ahead"
   exit 1
 fi
 
-claude --plugin-dir "$DOTBUBL_DIR" --continue -p "Yes, remove it."
+claude --plugin-dir "$DOTBUBL_DIR" --permission-mode acceptEdits --continue -p "Yes, remove it."
 
 if [[ -f backlog/0001-fix-flaky-login-test.md ]]; then
   echo "FAIL: file still exists after explicit go-ahead"
