@@ -130,6 +130,17 @@ Checked against their current repo, not guessed:
 - **Multi-harness support** (Codex/Cursor/Kimi/Pi/Antigravity/OpenCode
   plugin variants). `dotbubl` targets Claude Code only.
 
+## Documentation stays current
+
+**After every change, check documentation — don't defer it.** The two main
+docs are `README.md` and `CLAUDE.md`, plus anything they refer to (e.g.
+`docs/testing.md`, `skills/*/SKILL.md`). Re-read the sections a change
+touches and confirm they're still valid: paths that still exist, counts and
+lists that still match, described behavior that still matches what the code
+actually does. Docs that quietly drift from the repo are worse than no docs
+— they actively mislead the next reader (human or agent). Fix drift in the
+same commit as the change that caused it, not as a follow-up.
+
 ## Ongoing workflow
 
 1. Edit skills/agents/hooks in this repo.
@@ -151,6 +162,8 @@ Checked against their current repo, not guessed:
 3. Bump `version` in **both** `.claude-plugin/plugin.json` and
    `.claude-plugin/marketplace.json` — installed copies only notice an
    update when the version actually changes.
-4. Commit → branch → PR → merge.
-5. On each machine with it installed: `/plugin marketplace update dotbubl`,
+4. Check documentation before committing — see "Documentation stays
+   current" above.
+5. Commit → branch → PR → merge.
+6. On each machine with it installed: `/plugin marketplace update dotbubl`,
    then restart/reload.
