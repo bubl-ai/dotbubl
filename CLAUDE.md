@@ -15,6 +15,30 @@ superpowers does it *now* (re-fetch, don't rely on memory of an old
 checkout) first, then adapt — not copy wholesale. See "What we deliberately
 don't adopt" below for the parts that don't fit this repo's scale.
 
+## Repo layout
+
+```
+.claude-plugin/             plugin.json + marketplace.json — only files that belong here
+skills/<name>/SKILL.md      one skill per directory; using-dotbubl is the meta-skill
+                            (see its own "Skill Priority" section when adding another)
+hooks/                      hooks.json + hook scripts (session-start injects using-dotbubl
+                            as always-on context — plugins have no CLAUDE.md equivalent)
+tests/<skill-name>/         committed, runnable tests per skill — see "Testing convention"
+docs/testing.md             testing convention in full
+docs/superpowers/plans/     committed plan/spec docs from the writing-plans / brainstorming
+docs/superpowers/specs/     skills, one per feature, named YYYY-MM-DD-<slug>.md
+backlog/                    this repo's own personal backlog — gitignored (see
+                            skills/backlog/SKILL.md's note on why: the plugin ships the
+                            whole repo root, and backlog items aren't meant to be published)
+```
+
+`agents/` (custom subagent definitions) and `.mcp.json` (MCP servers) don't
+exist yet but follow the same pattern when added — repo root, never inside
+`.claude-plugin/`. `README.md` covers the user-facing shape of this same
+layout; keep both in sync when the structure changes, but don't just
+duplicate one into the other — README explains what installers get, this
+section explains where a contributor edits it.
+
 ## Installing
 
 ```
