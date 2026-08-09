@@ -71,6 +71,7 @@ Each `test-N-<behavior>.sh`:
 | `test-4-completion.sh` | Completion confirms before deleting |
 | `test-5-required-fields.sh` | Missing required fields (priority/description/acceptance criteria) block the write, prompting instead |
 | `test-6-no-placeholders.sh` | Generic placeholder content ("N/A") for required fields blocks the write too, not just fully-absent fields |
+| `test-7-context-content.sh` | A deferred-task item's `## Context` section captures real discussion specifics (e.g. a rejected alternative), not boilerplate |
 
 ## Adding new tests
 

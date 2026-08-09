@@ -33,6 +33,7 @@ if [[ -n "$FILE" ]]; then
   assert_frontmatter "$FILE" '^type: chore$' "type correct" || FAILURES=$((FAILURES + 1))
   assert_frontmatter "$FILE" '^priority: P2$' "priority correct" || FAILURES=$((FAILURES + 1))
   assert_frontmatter "$FILE" '^tags:.*\bvalidation\b' "tags correct" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '## Context' "has Context section" || FAILURES=$((FAILURES + 1))
 fi
 
 if [[ "$FAILURES" -gt 0 ]]; then
