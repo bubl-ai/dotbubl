@@ -59,19 +59,38 @@ created: 2026-08-08
 
 ...
 
+## Context
+
+...
+
 ## Acceptance Criteria
 
 - [ ] ...
 ```
 
-`title`, `type`, `priority`, `description`, and `acceptance criteria` are
-all **required** — never write an item missing any of these, and never
-fill one with a generic placeholder just to move forward. If one can't be
-gathered or drafted from context, ask for it before writing. `tags` and
-`depends_on` are optional.
+`title`, `type`, `priority`, `description`, `context`, and `acceptance
+criteria` are all **required** — never write an item missing any of these,
+and never fill one with a generic placeholder just to move forward. If one
+can't be gathered or drafted from context, ask for it before writing.
+`tags` and `depends_on` are optional.
 
 `priority` must always be asked directly if not already stated — never
 silently defaulted.
+
+**`context` makes the item stand alone.** A future session picking this
+item up may have none of the current conversation available, so it needs
+*why*, not just *what*. Capture the reasoning that actually led here: what
+was discussed, what alternatives were considered and rejected (and why),
+and any constraints that shaped the scope or priority. Draw this from the
+real conversation — never invent specifics that weren't actually discussed.
+
+If the item comes from a direct, one-line ask with no real prior
+discussion, a brief, honest statement of that fact (e.g. "Requested
+directly; no prior discussion to capture.") satisfies the requirement —
+that's real information, not a placeholder. What's *not* acceptable, no
+matter how much discussion actually happened: generic non-answers like
+"N/A", "see above", or "see description" that dodge the requirement rather
+than truthfully filling it.
 
 ## Querying the backlog
 
@@ -84,16 +103,18 @@ last) with `id` as the tiebreaker for items sharing a priority.
 
 When the user says they want to log a new todo/idea: gather, conversationally,
 whatever of these isn't already given — title, `type`, `priority` (ask
-directly, never default), `tags`, description, acceptance criteria. Title,
-type, priority, description, and acceptance criteria are required — keep
-asking until each is actually provided; don't move on with any of them
-missing or generic.
+directly, never default), `tags`, description, context, acceptance
+criteria. Title, type, priority, description, context, and acceptance
+criteria are required — keep asking until each is actually provided; don't
+move on with any of them missing or generic. See "Item files" above for
+what belongs in `context` and when a brief "no prior discussion" note is
+enough.
 
 Once everything required is gathered, show a confirmation line and wait for
 an explicit yes before writing:
 
 > Add to backlog: "<title>" [<type> / <priority> / <tags>] — with
-> description and N acceptance criteria. Sound right?
+> description, context, and N acceptance criteria. Sound right?
 
 Do not write the file until the user responds affirmatively to that
 specific confirmation. Once confirmed, compute the next id and slug per
@@ -104,16 +125,20 @@ body shape shown above, then confirm what was added (id, title, path).
 
 When Claude (or a subagent) identifies, during work, something that could be
 tackled in a future PR/MR, and the user approves deferring it: draft title,
-`type`, `priority`, `tags`, description, and acceptance criteria from the
-conversation context that already exists. Title, type, priority,
-description, and acceptance criteria are required — if the context doesn't
-give enough to draft a real one (not a placeholder), ask before showing the
-confirmation line. If `priority` is not clear from that context, ask
-directly before proceeding — never default it. Then show a confirmation
-line and wait for an explicit yes before doing anything else:
+`type`, `priority`, `tags`, description, context, and acceptance criteria
+from the conversation context that already exists. Title, type, priority,
+description, context, and acceptance criteria are required — if the
+context doesn't give enough to draft a real one (not a placeholder), ask
+before showing the confirmation line. This is usually the richest path for
+`context`: mid-session deferrals almost always follow real discussion
+(design decisions, rejected approaches, why something's out of scope) —
+capture that, not just a restatement of the description. If `priority` is
+not clear from that context, ask directly before proceeding — never
+default it. Then show a confirmation line and wait for an explicit yes
+before doing anything else:
 
 > Adding to backlog: "<title>" [<type> / <priority> / <tags>] — with
-> description and N acceptance criteria. Sound right?
+> description, context, and N acceptance criteria. Sound right?
 
 Do not write the file until the user responds affirmatively to that specific
 confirmation. Once confirmed, write it using the same id/slug/frontmatter

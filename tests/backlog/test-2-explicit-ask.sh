@@ -31,6 +31,7 @@ if [[ -n "$FILE" ]]; then
   assert_frontmatter "$FILE" '^priority: P1$' "priority correct" || FAILURES=$((FAILURES + 1))
   assert_frontmatter "$FILE" '^tags:.*\btui\b' "tags correct" || FAILURES=$((FAILURES + 1))
   assert_frontmatter "$FILE" '## Description' "has Description section" || FAILURES=$((FAILURES + 1))
+  assert_frontmatter "$FILE" '## Context' "has Context section even with no prior discussion to draw from" || FAILURES=$((FAILURES + 1))
   assert_frontmatter "$FILE" '## Acceptance Criteria' "has Acceptance Criteria section" || FAILURES=$((FAILURES + 1))
 fi
 
