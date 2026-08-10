@@ -19,8 +19,10 @@ Superpowers has two tiers:
   skill compliance. Slow (3-30+ minutes per scenario), real API spend,
   explicitly not part of CI even for them today.
 
-We have one tier: **`tests/<skill-name>/`** — see `tests/backlog/README.md`
-for the concrete structure. It plays the role of superpowers' `tests/`, but
+We have one tier: **`tests/<skill-or-agent-name>/`** — see
+`tests/backlog/README.md` (skill) or `tests/guideline-check/README.md`
+(agent) for the concrete structure. It plays the role of superpowers'
+`tests/`, but
 because our skills are pure prose/instructions (no non-LLM code to test
 separately), our tests *are* real Claude Code invocations against
 `--plugin-dir`, checking actual behavior (files written, confirmations
@@ -57,12 +59,13 @@ tests/backlog/run-all.sh
 
 Each skill's test directory has its own `README.md` with specifics.
 
-## Writing tests for a new skill
+## Writing tests for a new skill or agent
 
-1. Create `tests/<skill-name>/` with `test-N-*.sh` per behavior,
-   `run-all.sh`, `README.md` — copy the shape of `tests/backlog/`.
+1. Create `tests/<skill-or-agent-name>/` with `test-N-*.sh` per behavior,
+   `run-all.sh`, `README.md` — copy the shape of `tests/backlog/` (skill)
+   or `tests/guideline-check/` (agent). The shape is identical either way.
 2. **Source the shared `tests/test-helpers.sh`** (`"$SCRIPT_DIR/../test-helpers.sh"`
-   from inside `tests/<skill-name>/`) — don't copy it per skill. This
+   from inside `tests/<skill-or-agent-name>/`) — don't copy it per skill or agent. This
    matches superpowers: every skill's tests in `tests/claude-code/` source
    the same `test-helpers.sh`, not a per-skill copy. Extend the shared file
    when a new assertion is generically useful (the way `assert_frontmatter`
