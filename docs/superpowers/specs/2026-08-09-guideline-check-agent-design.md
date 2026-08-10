@@ -37,9 +37,10 @@ turn comes, building against the interface fixed here.
 name: guideline-check
 description: Use when a dotbubl guideline skill (before-PR checks) needs
   read-only analysis of the working tree or a branch diff, reporting
-  results via ReportFindings. Shared by every guideline skill —
-  structurally cannot edit files, so parallel guideline runs never
-  conflict.
+  results via ReportFindings. Shared by every guideline skill — has no
+  Edit/Write/NotebookEdit tools; Bash is retained for git inspection only
+  and is instructed never to write, ensuring no concurrent modification
+  conflicts.
 tools: Read, Grep, Glob, Bash, ReportFindings
 model: inherit
 ---
@@ -47,8 +48,9 @@ model: inherit
 
 - **`tools` is an explicit allow-list**, not a `disallowedTools` exclusion —
   safer than trying to enumerate everything to exclude, and self-documenting
-  about exactly what this agent can touch. No `Edit`/`Write`/`NotebookEdit`,
-  ever, regardless of what a dispatch prompt asks for.
+  about exactly what this agent can touch. `Edit`, `Write`, and
+  `NotebookEdit` are structurally unavailable; `Bash` is present for git
+  inspection only and is instructed never to write.
 - **`model: inherit`** is the file's only default, and carries no cost/speed
   policy. Which model an actual dispatch uses is decided by the caller: for
   guidelines run through `before-pr-checks` (#3), that's a `model` value on
@@ -98,10 +100,16 @@ complexity with no concrete consumer).
   trivial, verifiable inspection prompt; assert the run produces a
   `ReportFindings`-shaped result.
 - **`test-2-no-filesystem-writes.sh`** — dispatch it with a prompt that
-  *tries* to get it to write or edit something; assert the test workspace's
-  `git status` is unchanged afterward. This is the test that actually
-  proves the restriction is structural (no tool available) rather than
-  merely a prompted promise the model could be talked out of.
+  explicitly instructs it to write using Bash; assert the test workspace's
+  `git status` is unchanged afterward. This test verifies the behavioral
+  guarantee for the Bash vector (instructed never to write, model complies),
+  while `Edit`/`Write`/`NotebookEdit` being unavailable provides structural
+  safety against other write mechanisms.
+- **`test-3-diffs-against-base-ref.sh`** — dispatch it with a prompt to
+  inspect changes via `git diff`; assert the agent actually runs Bash to
+  compute the diff and reports realistic findings, not hallucinated content.
+  This verifies the core design requirement that the agent has Bash for git
+  inspection and actually uses it.
 
 This is the first agent added to the repo, so it's also the first time
 `tests/<name>/` covers something other than a skill — see Documentation

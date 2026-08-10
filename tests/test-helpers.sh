@@ -59,6 +59,70 @@ run_claude() {
     fi
 }
 
+# Run Claude Code with structured (stream-json) output, for tests that need
+# to verify actual tool/subagent dispatch rather than just relayed text —
+# plain run_claude only captures the final assistant message, which can't
+# prove a specific subagent type was actually invoked (the model could
+# answer directly instead of dispatching it, and the final text would look
+# identical either way).
+# Usage: run_claude_json "prompt" [timeout_seconds]
+# Outputs the raw stream-json lines (one JSON object per line).
+run_claude_json() {
+    local prompt="$1"
+    local timeout_s="${2:-60}"
+
+    local cmd=(claude --plugin-dir "$REPO_ROOT" --permission-mode acceptEdits --output-format stream-json --verbose)
+    cmd+=(-p "$prompt")
+
+    if [[ -n "$_TIMEOUT_CMD" ]]; then
+        "$_TIMEOUT_CMD" -k 10 "$timeout_s" "${cmd[@]}" 2>&1
+    else
+        "${cmd[@]}" 2>&1
+    fi
+}
+
+# Check that a subagent of the given type was actually dispatched via the
+# Agent tool, by looking for its subagent_type on a stream-json event —
+# not just present in relayed conversational text (which is easy to satisfy
+# without actually dispatching anything).
+# Usage: assert_subagent_dispatched "json_output" "dotbubl:guideline-check" "test name"
+assert_subagent_dispatched() {
+    local json_output="$1"
+    local subagent_type="$2"
+    local test_name="${3:-test}"
+
+    if echo "$json_output" | grep -q "\"subagent_type\":\"$subagent_type\""; then
+        echo "  [PASS] $test_name"
+        return 0
+    else
+        echo "  [FAIL] $test_name"
+        echo "  Expected a dispatched subagent_type: $subagent_type"
+        return 1
+    fi
+}
+
+# Check that a subagent of the given type concluded by calling the named
+# tool (e.g. ReportFindings), via stream-json's "last_tool_name" field on
+# that subagent's task_progress events. Filters to lines mentioning the
+# subagent_type first, then checks for the tool name within that subset —
+# order-independent, since JSON key order isn't guaranteed stable.
+# Usage: assert_subagent_used_tool "json_output" "dotbubl:guideline-check" "ReportFindings" "test name"
+assert_subagent_used_tool() {
+    local json_output="$1"
+    local subagent_type="$2"
+    local tool_name="$3"
+    local test_name="${4:-test}"
+
+    if echo "$json_output" | grep "\"subagent_type\":\"$subagent_type\"" | grep -q "\"last_tool_name\":\"$tool_name\""; then
+        echo "  [PASS] $test_name"
+        return 0
+    else
+        echo "  [FAIL] $test_name"
+        echo "  Expected subagent_type $subagent_type to have used tool: $tool_name"
+        return 1
+    fi
+}
+
 # Check if output contains a pattern (case-insensitive: patterns are prose
 # keywords, and models capitalize inconsistently).
 # Usage: assert_contains "output" "pattern" "test name"
@@ -214,10 +278,13 @@ new_scratch_repo() {
 }
 
 export -f run_claude
+export -f run_claude_json
 export -f assert_contains
 export -f assert_not_contains
 export -f assert_order
 export -f assert_file_exists
 export -f assert_no_file
 export -f assert_frontmatter
+export -f assert_subagent_dispatched
+export -f assert_subagent_used_tool
 export -f new_scratch_repo
