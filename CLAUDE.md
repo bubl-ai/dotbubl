@@ -19,11 +19,13 @@ don't adopt" below for the parts that don't fit this repo's scale.
 
 ```
 .claude-plugin/             plugin.json + marketplace.json — only files that belong here
+agents/<name>.md            custom subagent definitions, one file per agent; guideline-check
+                            is the first — a shared read-only subagent for before-PR checks
 skills/<name>/SKILL.md      one skill per directory; using-dotbubl is the meta-skill
                             (see its own "Skill Priority" section when adding another)
 hooks/                      hooks.json + hook scripts (session-start injects using-dotbubl
                             as always-on context — plugins have no CLAUDE.md equivalent)
-tests/<skill-name>/         committed, runnable tests per skill — see "Testing convention"
+tests/<skill-or-agent-name>/ committed, runnable tests per skill or agent — see "Testing convention"
 docs/testing.md             testing convention in full
 docs/superpowers/plans/     committed plan/spec docs from the writing-plans / brainstorming
 docs/superpowers/specs/     skills, one per feature, named YYYY-MM-DD-<slug>.md
@@ -32,12 +34,13 @@ backlog/                    this repo's own personal backlog — gitignored (see
                             whole repo root, and backlog items aren't meant to be published)
 ```
 
-`agents/` (custom subagent definitions) and `.mcp.json` (MCP servers) don't
-exist yet but follow the same pattern when added — repo root, never inside
-`.claude-plugin/`. `README.md` covers the user-facing shape of this same
-layout; keep both in sync when the structure changes, but don't just
-duplicate one into the other — README explains what installers get, this
-section explains where a contributor edits it.
+`agents/` now holds custom subagent definitions (`guideline-check` is the
+first); `.mcp.json` (MCP servers) doesn't exist yet but follows the same
+pattern when added — repo root, never inside `.claude-plugin/`. `README.md`
+covers the user-facing shape of this same layout; keep both in sync when
+the structure changes, but don't just duplicate one into the other —
+README explains what installers get, this section explains where a
+contributor edits it.
 
 ## Installing
 
@@ -63,13 +66,14 @@ then restart or reload so the new version takes effect.
 
 Full detail in `docs/testing.md`; the summary that matters day to day:
 
-**Every skill that ships verifiable behavior gets committed, runnable tests
-under `tests/<skill-name>/`** — never left as prose-only plan content or
-throwaway `/tmp` scripts. `/tmp` files aren't part of the repo, don't
-survive a reboot, and can't be re-run by anyone without reverse-engineering
-them back out of a plan doc. That already happened once with
-`skills/backlog` before being fixed — `tests/backlog/` is the reference
-shape for every skill after it:
+**Every skill or agent that ships verifiable behavior gets committed,
+runnable tests under `tests/<skill-or-agent-name>/`** — never left as
+prose-only plan content or throwaway `/tmp` scripts. `/tmp` files aren't
+part of the repo, don't survive a reboot, and can't be re-run by anyone
+without reverse-engineering them back out of a plan doc. That already
+happened once with `skills/backlog` before being fixed — `tests/backlog/`
+is the reference shape for every skill after it, and `tests/guideline-check/`
+is the same shape applied to an agent instead of a skill:
 
 - **`tests/test-helpers.sh`** — shared `run_claude`/`assert_*` functions
   (modeled on superpowers' `tests/claude-code/test-helpers.sh`), one file

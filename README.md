@@ -86,13 +86,15 @@ for the full contributor workflow (testing, versioning, etc.).
 .claude-plugin/
   plugin.json       # plugin manifest
   marketplace.json  # self-hosted marketplace (this repo installs itself)
+agents/
+  guideline-check.md  # shared read-only subagent for before-PR guideline checks
 skills/
   using-dotbubl/     # meta-skill: enforces checking/using skills before acting
   backlog/           # per-project backlog of todos/ideas
 hooks/
   hooks.json         # registers the SessionStart hook
   session-start      # injects using-dotbubl as always-on context
-tests/               # committed, runnable tests per skill
+tests/               # committed, runnable tests per skill or agent
 docs/                # testing convention + design plans/specs
 ```
 
