@@ -101,10 +101,11 @@ assert_subagent_dispatched() {
     fi
 }
 
-# Check that a subagent of the given type concluded by calling the named
-# tool (e.g. ReportFindings), via stream-json's "last_tool_name" field on
-# that subagent's task_progress events. Filters to lines mentioning the
-# subagent_type first, then checks for the tool name within that subset —
+# Check that a subagent of the given type called the named tool
+# (e.g. ReportFindings) by examining the actual tool-use event in the assistant
+# message, not a progress-event summary which may not fire. Checks for
+# "name":"$tool_name" on lines mentioning the subagent_type, filtering to
+# subagent_type first then checking for the tool name within that subset —
 # order-independent, since JSON key order isn't guaranteed stable.
 # Usage: assert_subagent_used_tool "json_output" "dotbubl:guideline-check" "ReportFindings" "test name"
 assert_subagent_used_tool() {
@@ -113,7 +114,7 @@ assert_subagent_used_tool() {
     local tool_name="$3"
     local test_name="${4:-test}"
 
-    if echo "$json_output" | grep "\"subagent_type\":\"$subagent_type\"" | grep -q "\"last_tool_name\":\"$tool_name\""; then
+    if echo "$json_output" | grep "\"subagent_type\":\"$subagent_type\"" | grep -q "\"name\":\"$tool_name\""; then
         echo "  [PASS] $test_name"
         return 0
     else
