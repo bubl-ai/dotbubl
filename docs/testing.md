@@ -61,9 +61,21 @@ Each skill's test directory has its own `README.md` with specifics.
 
 ## Writing tests for a new skill or agent
 
+Never left as prose-only plan content or throwaway `/tmp` scripts —
+`/tmp` files aren't part of the repo, don't survive a reboot, and can't
+be re-run by anyone without reverse-engineering them back out of a plan
+doc. That already happened once with `skills/backlog` before being fixed.
+
 1. Create `tests/<skill-or-agent-name>/` with `test-N-*.sh` per behavior,
    `run-all.sh`, `README.md` — copy the shape of `tests/backlog/` (skill)
    or `tests/guideline-check/` (agent). The shape is identical either way.
+   - Each `test-N-<behavior>.sh` is independently runnable and accumulates
+     failures across its assertions rather than stopping at the first one.
+   - `run-all.sh` runs every `test-*.sh` in that skill's directory,
+     supports `--verbose` / `--test NAME` / `--timeout`, prints a
+     pass/fail summary, and exits non-zero on any failure.
+   - `README.md` covers structure, the current test list, and how to add
+     more.
 2. **Source the shared `tests/test-helpers.sh`** (`"$SCRIPT_DIR/../test-helpers.sh"`
    from inside `tests/<skill-or-agent-name>/`) — don't copy it per skill or agent. This
    matches superpowers: every skill's tests in `tests/claude-code/` source
@@ -72,7 +84,22 @@ Each skill's test directory has its own `README.md` with specifics.
    was added for YAML-frontmatter items — useful to any future skill with
    frontmatter, not backlog-specific despite being added for it); keep
    something truly skill-specific local to that skill's own test directory
-   instead.
+   instead. Gotchas learned the hard way (e.g. `--permission-mode
+   acceptEdits` for non-interactive writes; macOS having no `timeout`
+   binary) get fixed in `test-helpers.sh`/`run-all.sh` directly, not just
+   noted — the next skill's tests inherit the fix for free.
 3. See `CLAUDE.md`'s Testing convention for the commit discipline
    (tests land in the same commit as the behavior they cover, and get
-   actually run — not just claimed — before committing).
+   actually run — not just claimed — before committing):
+
+   ```bash
+   tests/backlog/run-all.sh                       # this skill's suite
+   tests/backlog/run-all.sh --verbose              # full per-assertion output
+   tests/backlog/run-all.sh --test test-2-explicit-ask.sh   # one file
+   ```
+
+   If a plan doc's embedded test scripts (from `writing-plans`/SDD
+   execution) end up diverging from what's actually committed under
+   `tests/`, the committed files are the source of truth; treat the
+   plan's copy as a historical snapshot of intent, not something to keep
+   byte-identical.

@@ -64,53 +64,10 @@ then restart or reload so the new version takes effect.
 
 ## Testing convention
 
-Full detail in `docs/testing.md`; the summary that matters day to day:
-
 **Every skill or agent that ships verifiable behavior gets committed,
-runnable tests under `tests/<skill-or-agent-name>/`** — never left as
-prose-only plan content or throwaway `/tmp` scripts. `/tmp` files aren't
-part of the repo, don't survive a reboot, and can't be re-run by anyone
-without reverse-engineering them back out of a plan doc. That already
-happened once with `skills/backlog` before being fixed — `tests/backlog/`
-is the reference shape for every skill after it, and `tests/guideline-check/`
-is the same shape applied to an agent instead of a skill:
-
-- **`tests/test-helpers.sh`** — shared `run_claude`/`assert_*` functions
-  (modeled on superpowers' `tests/claude-code/test-helpers.sh`), one file
-  for the whole repo, sourced by every skill's test files as
-  `"$SCRIPT_DIR/../test-helpers.sh"`. **Not copied per skill** — matches
-  superpowers, where every skill's tests in `tests/claude-code/` source the
-  same file rather than each carrying its own copy. Add a new assertion
-  here when it's generically useful; keep something truly skill-specific
-  local to that skill's own `tests/<skill>/` directory instead.
-- One `tests/<skill>/test-N-<behavior>.sh` per behavior, independently
-  runnable, each accumulating failures across its assertions rather than
-  stopping at the first one.
-- `tests/<skill>/run-all.sh` — runs every `test-*.sh` in that skill's
-  directory, supports `--verbose` / `--test NAME` / `--timeout`, prints a
-  pass/fail summary, exits non-zero on any failure.
-- `tests/<skill>/README.md` — structure, current test list, how to add
-  more.
-- Whatever gotchas got learned the hard way (e.g. `--permission-mode
-  acceptEdits` for non-interactive writes; macOS having no `timeout`
-  binary) get fixed in `tests/test-helpers.sh`/`run-all.sh` directly, not
-  just noted — the next skill's tests inherit the fix for free, since
-  they source the same helpers file.
-
-**When you add or change a skill's behavior:** update or add the
-corresponding test file(s) in the same commit, and actually run the tests
-before committing — don't just claim it passes:
-
-```bash
-tests/backlog/run-all.sh                       # this skill's suite
-tests/backlog/run-all.sh --verbose              # full per-assertion output
-tests/backlog/run-all.sh --test test-2-explicit-ask.sh   # one file
-```
-
-If a plan doc's embedded test scripts (from `writing-plans`/SDD execution)
-end up diverging from what's actually committed under `tests/`, the
-committed files are the source of truth; treat the plan's copy as a
-historical snapshot of intent, not something to keep byte-identical.
+runnable tests under `tests/<skill-or-agent-name>/`, added in the same
+commit as the behavior change, and actually run — not just claimed —
+before committing.** Full structure and detail: `docs/testing.md`.
 
 ## What we deliberately don't adopt from superpowers
 
@@ -147,27 +104,5 @@ same commit as the change that caused it, not as a follow-up.
 
 ## Ongoing workflow
 
-1. Edit skills/agents/hooks in this repo.
-2. Test locally without touching your real install:
-   - `claude --plugin-dir .` — loads the plugin from the local working copy
-     for that session only (nothing persisted, no marketplace/install
-     involved). If also installed for real, this takes priority for the
-     session, so you can compare against the installed version.
-   - `/reload-plugins` inside that session after further edits — Claude Code
-     doesn't watch the filesystem, so this re-reads skills/agents/hooks/MCP
-     configs on demand.
-   - `-p "<prompt>"` for a scriptable one-shot smoke test, e.g.:
-     `claude --plugin-dir . -p "Run /dotbubl:using-dotbubl and confirm you
-     loaded it, nothing else."`
-   - `claude plugin validate .` for structural validation (manifest shape,
-     paths) without invoking the model.
-   - See "Testing convention" above — anything you'd re-run more than once
-     belongs in `tests/<skill>/`, not just run ad hoc.
-3. Bump `version` in **both** `.claude-plugin/plugin.json` and
-   `.claude-plugin/marketplace.json` — installed copies only notice an
-   update when the version actually changes.
-4. Check documentation before committing — see "Documentation stays
-   current" above.
-5. Commit → branch → PR → merge.
-6. On each machine with it installed: `/plugin marketplace update dotbubl`,
-   then restart/reload.
+See the `dev-loop` skill (`.claude/skills/dev-loop/SKILL.md`) for the
+local edit/test/commit loop — load it when iterating on this plugin.
