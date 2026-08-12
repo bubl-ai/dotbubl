@@ -56,6 +56,24 @@ Every item requires a title, type (`bug` / `feature` / `enhancement` /
 description, and acceptance criteria — Claude always asks for anything
 missing or vague rather than guessing or writing a placeholder.
 
+### `keeping-docs-current` — checks whether your docs still match the code
+
+Given a base ref to diff against, checks whether `CLAUDE.md`, `README.md`,
+and anything they reference are stale relative to what changed —
+dispatches a read-only analysis and reports findings, it never edits a doc
+itself.
+
+```
+You:     Check whether the docs are stale against main.
+Claude:  README.md still references docs/setup.md, which was removed on
+         this branch. No other issues found.
+```
+
+Needs a base ref — provide one explicitly (a branch name, `main`, a commit
+SHA) when asking; it won't guess one. Usable standalone today; once the
+`before-pr-checks` guideline lands, that ref gets supplied automatically as
+part of a before-PR check instead.
+
 More skills land here over time; each new one gets the same treatment —
 checked automatically, no need to memorize a command.
 
@@ -91,6 +109,7 @@ agents/
 skills/
   using-dotbubl/     # meta-skill: enforces checking/using skills before acting
   backlog/           # per-project backlog of todos/ideas
+  keeping-docs-current/  # checks CLAUDE.md/README.md/referenced docs for staleness against a base ref
 hooks/
   hooks.json         # registers the SessionStart hook
   session-start      # injects using-dotbubl as always-on context

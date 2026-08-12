@@ -47,6 +47,11 @@ For subagent testing specifically, this file also provides:
   that the model mentioned it in text
 - `assert_subagent_used_tool`: Verifies that the subagent concluded by calling a 
   specific tool (e.g., `ReportFindings`)
+- `assert_subagent_empty_findings`: Verifies a subagent called ReportFindings with
+  an empty findings array (the "nothing wrong" case)
+- `assert_subagent_finding_mentions`: Verifies a subagent's ReportFindings call
+  included a finding whose content matches a given pattern, not just that the
+  surrounding output text does
 
 Plain `run_claude` output alone can't prove a subagent was actually dispatched — 
 the model could answer the question directly without dispatching anything, and 

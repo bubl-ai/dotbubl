@@ -23,10 +23,13 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Skill Priority
 
-This toolkit is still small — there are two skills so far: this one
-(`using-dotbubl`) and `backlog`. `backlog` is standalone and independently
-triggered, with no ordering relationship to this skill or anything else —
-nothing to sequence yet. As more dotbubl skills are added, document their
+This toolkit is still small — there are three skills so far: this one
+(`using-dotbubl`), `backlog`, and `keeping-docs-current`. All three are
+standalone and independently triggered, with no ordering relationship
+between them — `keeping-docs-current` needs a base ref supplied by whoever
+invokes it (a human today; the `before-pr-checks` orchestrator once it
+exists), but that's an input requirement, not a sequencing relationship
+with another skill. As more dotbubl skills are added, document their
 priority order here (e.g. which process skill runs before which
 implementation skill).
 
