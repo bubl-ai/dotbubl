@@ -44,7 +44,7 @@ FAILURES=0
 
 output_old=$(run_claude_json "Use the keeping-docs-current skill to check whether this repository's documentation is stale, using base ref $BASE_OLD." 120)
 assert_subagent_dispatched "$output_old" "dotbubl:guideline-check" "dispatched for base ref spanning the staleness-introducing commit" || FAILURES=$((FAILURES + 1))
-assert_contains "$output_old" "setup.md" "finds the staleness when the base ref spans it" || FAILURES=$((FAILURES + 1))
+assert_subagent_finding_mentions "$output_old" "dotbubl:guideline-check" "setup.md" "finds the staleness when the base ref spans it" || FAILURES=$((FAILURES + 1))
 
 output_recent=$(run_claude_json "Use the keeping-docs-current skill to check whether this repository's documentation is stale, using base ref $BASE_RECENT." 120)
 assert_subagent_dispatched "$output_recent" "dotbubl:guideline-check" "dispatched for base ref after the staleness-introducing commit" || FAILURES=$((FAILURES + 1))

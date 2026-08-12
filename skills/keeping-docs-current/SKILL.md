@@ -42,7 +42,10 @@ base ref is `before-pr-checks`'s job, not this skill's.)
 
    Use Bash to run git diff/git log against <BASE_REF> to see what
    changed, scoped to that diff — don't flag pre-existing staleness the
-   diff doesn't touch. If <BASE_REF> is invalid or the diff command
+   diff doesn't touch. Use `git diff $(git merge-base <BASE_REF> HEAD)`
+   (not a plain two-dot diff against <BASE_REF> directly) so commits made
+   on <BASE_REF> after this branch diverged aren't mistaken for this
+   branch's own changes. If <BASE_REF> is invalid or the diff command
    fails, report that as an error in your final message rather than an
    empty findings list.
 

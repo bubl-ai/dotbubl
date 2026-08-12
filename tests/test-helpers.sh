@@ -155,6 +155,38 @@ assert_subagent_empty_findings() {
     fi
 }
 
+# Check that a subagent of the given type called ReportFindings with a
+# non-empty findings array whose content matches the given pattern —
+# proves the *finding itself* (not just surrounding conversation text)
+# names what's expected, since plain output-text grepping can pass
+# vacuously (the pattern may appear in the subagent's own git diff/Read
+# output regardless of what it concluded).
+# Usage: assert_subagent_finding_mentions "json_output" "dotbubl:guideline-check" "setup.md" "test name"
+assert_subagent_finding_mentions() {
+    local json_output="$1"
+    local subagent_type="$2"
+    local pattern="$3"
+    local test_name="${4:-test}"
+
+    local scoped
+    scoped=$(echo "$json_output" | grep "\"subagent_type\":\"$subagent_type\"" | grep "\"name\":\"ReportFindings\"")
+
+    if [[ -z "$scoped" ]]; then
+        echo "  [FAIL] $test_name"
+        echo "  Expected subagent_type $subagent_type to have called ReportFindings"
+        return 1
+    fi
+
+    if echo "$scoped" | grep -qi -- "$pattern"; then
+        echo "  [PASS] $test_name"
+        return 0
+    else
+        echo "  [FAIL] $test_name"
+        echo "  Expected the ReportFindings call itself to mention: $pattern"
+        return 1
+    fi
+}
+
 # Check if output contains a pattern (case-insensitive: patterns are prose
 # keywords, and models capitalize inconsistently).
 # Usage: assert_contains "output" "pattern" "test name"
@@ -320,4 +352,5 @@ export -f assert_frontmatter
 export -f assert_subagent_dispatched
 export -f assert_subagent_used_tool
 export -f assert_subagent_empty_findings
+export -f assert_subagent_finding_mentions
 export -f new_scratch_repo

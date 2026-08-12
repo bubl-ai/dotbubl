@@ -38,7 +38,7 @@ output=$(run_claude_json "Use the keeping-docs-current skill to check whether th
 FAILURES=0
 assert_subagent_dispatched "$output" "dotbubl:guideline-check" "dispatched the guideline-check subagent" || FAILURES=$((FAILURES + 1))
 assert_subagent_used_tool "$output" "dotbubl:guideline-check" "ReportFindings" "concluded via ReportFindings" || FAILURES=$((FAILURES + 1))
-assert_contains "$output" "setup.md" "names the actual stale reference" || FAILURES=$((FAILURES + 1))
+assert_subagent_finding_mentions "$output" "dotbubl:guideline-check" "setup.md" "names the actual stale reference in the finding itself" || FAILURES=$((FAILURES + 1))
 
 if [[ "$FAILURES" -gt 0 ]]; then
   echo "=== FAILED ($FAILURES) ==="
